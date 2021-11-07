@@ -1,0 +1,10 @@
+__pycache__/
+*__pycache__/
+todo.txt
+.data/
+.vector_cache/
+todo.yml
+*.pt
+run.sbatch
+results/
+.idea

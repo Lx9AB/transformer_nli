@@ -1,0 +1,7 @@
+torch==1.4.0
+torchtext==0.6.0
+prettytable==2.0.0
+spacy==2.3.4
+tqdm==4.54.0
+requests~=2.25.0
+fastnlp~=0.6.0
