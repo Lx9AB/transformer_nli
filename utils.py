@@ -6,27 +6,27 @@ from argparse import ArgumentParser
 
 def parse_args():
     parser = ArgumentParser(description='PyTorch/torchtext NLI Baseline')
-    parser.add_argument('--dataset', '-d', type=str, default='mnli')
+    parser.add_argument('--dataset', '-d', type=str, default='snli')
     parser.add_argument('--gpu', type=int, default=1)
-    parser.add_argument('--batch-size', type=int, default=128)
+    parser.add_argument('--batch-size', type=int, default=64)
     parser.add_argument('--max-len', type=int, default=128)
 
-    parser.add_argument('--embed-dim', type=int, default=200)
+    parser.add_argument('--embed-dim', type=int, default=128)
     parser.add_argument('--num-heads', type=int, default=4)
-    parser.add_argument('--k-dim', type=int, default=50)
-    parser.add_argument('--v-dim', type=int, default=50)
-    parser.add_argument('--ffn-embed-dim', type=int, default=400)
+    parser.add_argument('--k-dim', type=int, default=32)
+    parser.add_argument('--v-dim', type=int, default=32)
+    parser.add_argument('--ffn-embed-dim', type=int, default=256)
     parser.add_argument('--N', type=int, default=3)
     parser.add_argument('--M', type=int, default=2)
 
-    parser.add_argument('--dropout', type=float, default=0.3)
+    parser.add_argument('--dropout', type=float, default=0.1)
     parser.add_argument('--activation-dropout', type=float, default=0.)
     parser.add_argument('--attention-dropout', type=float, default=0.)
 
     parser.add_argument('--epochs', type=int, default=200)
 
     parser.add_argument('--warmup-updates', type=int, default=4000)
-    parser.add_argument('--lr', type=float, default=7e-4)
+    parser.add_argument('--lr', type=float, default=3e-4)
 
     parser.add_argument('--results-dir', type=str, default='results')
     return check_args(parser.parse_args())
