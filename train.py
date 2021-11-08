@@ -1,8 +1,6 @@
 import time
 import datetime
 from torch import optim
-from torch.optim import lr_scheduler
-
 import datasets
 from labelSmoothedCrossEntropy import LabelSmoothedCrossEntropyCriterion
 from models import TransformerNLI
@@ -35,7 +33,6 @@ class Train():
         self.opt = InverseSquareRootScheduleOpt(optim.Adam(self.model.parameters(), lr=self.args.lr,
                                                            weight_decay=self.args.weight_decay),
                                                 self.args.lr, warmup_updates=self.args.warmup_updates)
-        self.lr_scheduler = lr_scheduler.CosineAnnealingLR(self.opt, T_max=10, eta_min=self.args.min_lr)
         self.best_val_acc = None
 
         print("resource preparation done: {}".format(datetime.datetime.now()))
