@@ -12,6 +12,9 @@ class InverseSquareRootScheduleOpt:
         self.lr_step = (lr - warmup_init_lr) / warmup_updates
         self.decay_factor = lr * warmup_updates**0.5
 
+    def get_lr(self):
+        return self.lr
+
     def zero_grad(self):
         self.optimizer.zero_grad()
 

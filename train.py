@@ -6,6 +6,7 @@ from torch.optim import lr_scheduler
 import datasets
 from labelSmoothedCrossEntropy import LabelSmoothedCrossEntropyCriterion
 from models import TransformerNLI
+from opt import InverseSquareRootScheduleOpt
 
 from utils import *
 
@@ -31,7 +32,9 @@ class Train():
 
         self.model.to(self.device)
         self.criterion = LabelSmoothedCrossEntropyCriterion(eps=0.1, reduce=True)
-        self.opt = optim.Adam(self.model.parameters(), lr=self.args.lr, weight_decay=self.args.weight_decay)
+        self.opt = InverseSquareRootScheduleOpt(optim.Adam(self.model.parameters(), lr=self.args.lr,
+                                                           weight_decay=self.args.weight_decay),
+                                                self.args.lr, warmup_updates=self.args.warmup_updates)
         self.lr_scheduler = lr_scheduler.CosineAnnealingLR(self.opt, T_max=10, eta_min=self.args.min_lr)
         self.best_val_acc = None
 
@@ -66,7 +69,6 @@ class Train():
             n_loss += loss.item()
             loss.backward()
             self.opt.step()
-        self.lr_scheduler.step()
         train_loss = n_loss / n_total
         train_acc = 100. * n_correct / n_total
         return train_loss, train_acc
@@ -105,12 +107,12 @@ class Train():
 
             print('| Epoch {:3d} | train loss {:5.3f} | train acc {:5.3f} '
                   '| val loss {:5.3f} | val acc {:5.3f} | lr {:1.7f} | time: {:5.3f}s |'.
-                  format(epoch, train_loss, train_acc, val_loss, val_acc, self.lr_scheduler.get_lr(), took))
+                  format(epoch, train_loss, train_acc, val_loss, val_acc, self.opt.get_lr(), took))
         self.finish()
 
     def finish(self):
         self.logger.info("[*] Training finished!\n\n")
-        print('-' * 99)
+        print('-' * 118)
         print(" [*] Training finished!")
         print(" [*] Please find the saved model and training log in results_dir")
 
