@@ -6,6 +6,8 @@ import models
 import datetime
 
 from prettytable import PrettyTable
+
+from models import TransformerNLI
 from utils import *
 
 
@@ -18,12 +20,11 @@ class Evaluate():
 
         self.dataset_options = {
             'batch_size': self.args.batch_size,
-            'device': self.device
         }
         self.dataset = datasets.__dict__[self.args.dataset](self.dataset_options)
 
-        self.validation_accuracy, self.model_options, model_dict = self.load_model()
-        self.model = models.__dict__[self.args.model](self.model_options)
+        self.validation_accuracy, model_dict = self.load_model()
+        self.model = TransformerNLI(self.args, self.dataset.vocab, self.dataset.label_vocab)
         self.model.to(self.device)
         self.model.load_state_dict(model_dict)
 
@@ -33,9 +34,9 @@ class Evaluate():
 
     def load_model(self):
         model = torch.load(
-            '{}/{}/{}/best-{}-{}-params.pt'.format(self.args.results_dir, self.args.model, self.args.dataset,
-                                                   self.args.model, self.args.dataset))
-        return model['accuracy'], model['options'], model['model_dict']
+            '{}/{}/best-{}-params.pt'.format(self.args.results_dir, self.args.dataset,
+                                             self.args.dataset))
+        return model['accuracy'], model['model_dict']
 
     def print_confusion_matrix(self, labels, confusion_matrix):
         table = PrettyTable()
@@ -62,23 +63,21 @@ class Evaluate():
         self.logger.info(table)
 
     def evaluate(self):
-        self.model.eval();
-        self.dataset.test_iter.init_epoch()
+        self.model.eval()
         n_correct, n_total, n_loss = 0, 0, 0
         labels = self.dataset.labels().copy()
         confusion_matrix = torch.zeros(len(labels), len(labels))
 
         with torch.no_grad():
-            for batch_idx, batch in enumerate(self.dataset.test_iter):
-                answer = self.model(batch)
-                loss = self.criterion(answer, batch.label)
+            for x, y in self.dataset.test_iter:
+                premise = x["premise"].cuda(self.device)
+                hypothesis = x["hypothesis"].cuda(self.device)
+                label = y["label"].cuda(self.device)
+                answer = self.model(premise, hypothesis)
+                loss = self.criterion(answer, label)
 
-                pred = torch.max(answer, 1)[1].view(batch.label.size())
-                for t, p in zip(batch.label, pred):
-                    confusion_matrix[t.long()][p.long()] += 1
-
-                n_correct += (pred == batch.label).sum().item()
-                n_total += batch.batch_size
+                n_correct += (torch.max(answer, 1)[1].view(label.size()) == label).sum().item()
+                n_total += len(label)
                 n_loss += loss.item()
 
             test_loss = n_loss / n_total
