@@ -109,7 +109,7 @@ class Train():
 
     def finish(self):
         self.logger.info("[*] Training finished!\n\n")
-        print('-' * 118)
+        print('-' * 120)
         print(" [*] Training finished!")
         print(" [*] Please find the saved model and training log in results_dir")
 
