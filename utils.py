@@ -6,6 +6,7 @@ from argparse import ArgumentParser
 
 def parse_args():
     parser = ArgumentParser(description='PyTorch/torchtext NLI Baseline')
+    parser.add_argument('--results-dir', type=str, default='results')
     parser.add_argument('--dataset', '-d', type=str, default='snli')
     parser.add_argument('--model', '-m', type=str, default='base-128')
     parser.add_argument('--gpu', type=int, default=0)
@@ -19,18 +20,15 @@ def parse_args():
     parser.add_argument('--ffn-embed-dim', type=int, default=128)
     parser.add_argument('--N', type=int, default=3)
     parser.add_argument('--M', type=int, default=2)
-
     parser.add_argument('--dropout', type=float, default=0.1)
     parser.add_argument('--activation-dropout', type=float, default=0.)
     parser.add_argument('--attention-dropout', type=float, default=0.)
 
     parser.add_argument('--epochs', type=int, default=200)
-
     parser.add_argument('--warmup-updates', type=int, default=4000)
     parser.add_argument('--lr', type=float, default=3e-4)
     parser.add_argument('--weight-decay', type=float, default=1e-3)
 
-    parser.add_argument('--results-dir', type=str, default='results')
     return check_args(parser.parse_args())
 
 
@@ -39,7 +37,7 @@ def parse_args():
 
 def check_args(args):
     # --result_dir
-    check_folder(os.path.join(args.results_dir, args.dataset))
+    check_folder(os.path.join(args.results_dir, args.dataset, args.model))
 
     # --epoch
     try:
