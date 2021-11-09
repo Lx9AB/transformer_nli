@@ -10,8 +10,8 @@ def parse_args():
     parser.add_argument('--model', '-m', type=str, default='base-128')
     parser.add_argument('--gpu', type=int, default=0)
     parser.add_argument('--batch-size', type=int, default=128)
-    parser.add_argument('--max-len', type=int, default=128)
 
+    parser.add_argument('--max-len', type=int, default=128)
     parser.add_argument('--embed-dim', type=int, default=128)
     parser.add_argument('--num-heads', type=int, default=4)
     parser.add_argument('--k-dim', type=int, default=32)
@@ -26,7 +26,7 @@ def parse_args():
 
     parser.add_argument('--epochs', type=int, default=200)
 
-    parser.add_argument('--warmup-updates', type=int, default=2000)
+    parser.add_argument('--warmup-updates', type=int, default=4000)
     parser.add_argument('--lr', type=float, default=3e-4)
     parser.add_argument('--weight-decay', type=float, default=1e-3)
 
@@ -86,7 +86,7 @@ def check_folder(log_dir):
 
 def get_logger(args, phase):
     logging.basicConfig(level=logging.INFO,
-                        filename="{}/{}/{}.log".format(args.results_dir, args.dataset, phase),
+                        filename="{}/{}/{}/{}.log".format(args.results_dir, args.dataset, args.model, phase),
                         format='%(asctime)s - %(message)s',
                         datefmt='%d-%b-%y %H:%M:%S')
     return logging.getLogger(phase)
