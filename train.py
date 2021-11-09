@@ -43,7 +43,7 @@ class Train():
             torch.save({
                 'accuracy': self.best_val_acc,
                 'model_dict': self.model.state_dict(),
-            }, '{}/{}/best-{}-params.pt'.format(self.args.results_dir, self.args.dataset, self.args.dataset))
+            }, '{}/{}/{}/best-params.pt'.format(self.args.results_dir, self.args.dataset, self.args.model))
         self.logger.info(
             '| Epoch {:3d} | train loss {:5.3f} | train acc {:5.3f} '
             '| val loss {:5.3f} | val acc {:5.3f} | time: {:5.3f}s |'

@@ -33,9 +33,7 @@ class Evaluate():
         print("resource preparation done: {}".format(datetime.datetime.now()))
 
     def load_model(self):
-        model = torch.load(
-            '{}/{}/best-{}-params.pt'.format(self.args.results_dir, self.args.dataset,
-                                             self.args.dataset))
+        model = torch.load('{}/{}/{}/best-params.pt'.format(self.args.results_dir, self.args.dataset, self.args.model))
         return model['accuracy'], model['model_dict']
 
     def print_confusion_matrix(self, labels, confusion_matrix):
