@@ -70,19 +70,19 @@ class MultiHeadedAttention(nn.Module):
             attn_weights = attn_weights.masked_fill(mask, float('-inf'))
             attn_weights = attn_weights.view(bsz * self.num_heads, tgt_len, src_len)
 
-        # epoch = gol.get_value("epoch")
-        # epoch = 40 if epoch is None else epoch
-        # epoch = 40 if epoch > 40 else epoch
-        # d = math.log(2000/epoch-1)
-        # if self.training:
-        #     noise = -torch.empty_like(attn_weights).exponential_().log()
-        #     attn_weights_noise = attn_weights + noise
-        #     attn_weights_max = attn_weights_noise.max(dim=-1, keepdim=True)[0]
-        #     mask = attn_weights_noise < (attn_weights_max - d)
-        # else:
-        #     attn_weights_max = attn_weights.max(dim=-1, keepdim=True)[0]
-        #     mask = attn_weights < (attn_weights_max - d)
-        # attn_weights = attn_weights.masked_fill(mask, float("-inf"))
+        epoch = gol.get_value("epoch")
+        epoch = 40 if epoch is None else epoch
+        epoch = 40 if epoch > 40 else epoch
+        d = math.log(2000/epoch-1)
+        if self.training:
+            noise = -torch.empty_like(attn_weights).exponential_().log()
+            attn_weights_noise = attn_weights + noise
+            attn_weights_max = attn_weights_noise.max(dim=-1, keepdim=True)[0]
+            mask = attn_weights_noise < (attn_weights_max - d)
+        else:
+            attn_weights_max = attn_weights.max(dim=-1, keepdim=True)[0]
+            mask = attn_weights < (attn_weights_max - d)
+        attn_weights = attn_weights.masked_fill(mask, float("-inf"))
 
         attn_weights = torch.softmax(attn_weights, dim=-1)
         attn_weights = F.dropout(attn_weights, p=self.dropout, training=self.training)

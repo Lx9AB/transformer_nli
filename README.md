@@ -47,7 +47,7 @@ python -m spacy download en
 ## Evaluation
 ```shell
   # Evaluating a trained model on snli dataset
-  python evaluate.pym -d snli
+  python evaluate.py -d snli
   
   # Evalauting a trained model on multinli dataset
   python evaluate.py -d multinli

@@ -10,6 +10,7 @@ from utils import *
 
 import global_value as gol
 
+
 gol._init()
 
 
