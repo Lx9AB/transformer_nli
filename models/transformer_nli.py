@@ -12,12 +12,13 @@ import global_value as gol
 
 
 class MultiHeadedAttention(nn.Module):
-    def __init__(self, embed_dim, num_heads, k_dim=None, v_dim=None, bias=True, dropout=0.0):
+    def __init__(self, embed_dim, num_heads, k_dim=None, v_dim=None, bias=True, dropout=0.0, nsa=False):
         super(MultiHeadedAttention, self).__init__()
         self.embed_dim = embed_dim
         self.num_heads = num_heads
         self.k_dim = embed_dim // num_heads if k_dim is None else k_dim
         self.v_dim = embed_dim // num_heads if v_dim is None else v_dim
+        self.nsa = nsa
 
         self.bias = bias
 
@@ -70,19 +71,20 @@ class MultiHeadedAttention(nn.Module):
             attn_weights = attn_weights.masked_fill(mask, float('-inf'))
             attn_weights = attn_weights.view(bsz * self.num_heads, tgt_len, src_len)
 
-        epoch = gol.get_value("epoch")
-        epoch = 40 if epoch is None else epoch
-        epoch = 40 if epoch > 40 else epoch
-        d = math.log(2000 / epoch - 1)
-        if self.training:
-            noise = -torch.empty_like(attn_weights).exponential_().log()
-            attn_weights_noise = attn_weights + noise
-            attn_weights_max = attn_weights_noise.max(dim=-1, keepdim=True)[0]
-            mask = attn_weights_noise < (attn_weights_max - d)
-        else:
-            attn_weights_max = attn_weights.max(dim=-1, keepdim=True)[0]
-            mask = attn_weights < (attn_weights_max - d)
-        attn_weights = attn_weights.masked_fill(mask, float("-inf"))
+        if self.nsa:
+            epoch = gol.get_value("epoch")
+            epoch = 50 if epoch is None else epoch
+            epoch = 50 if epoch > 50 else epoch
+            d = math.log(1000 / epoch - 1)
+            if self.training:
+                noise = -torch.empty_like(attn_weights).exponential_().log()
+                attn_weights_noise = attn_weights + noise
+                attn_weights_max = attn_weights_noise.max(dim=-1, keepdim=True)[0]
+                mask = attn_weights_noise < (attn_weights_max - d)
+            else:
+                attn_weights_max = attn_weights.max(dim=-1, keepdim=True)[0]
+                mask = attn_weights < (attn_weights_max - d)
+            attn_weights = attn_weights.masked_fill(mask, float("-inf"))
 
         attn_weights = torch.softmax(attn_weights, dim=-1)
         attn_weights = F.dropout(attn_weights, p=self.dropout, training=self.training)
