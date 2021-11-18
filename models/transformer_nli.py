@@ -294,7 +294,7 @@ class Comparison(nn.Module):
         nn.init.xavier_uniform_(self.fc2.weight)
         nn.init.xavier_uniform_(self.fc3.weight)
         nn.init.xavier_uniform_(self.fc4.weight)
-        if self.bias:
+        if self.fc1.bias is not None:
             nn.init.constant_(self.fc1.bias, 0.)
             nn.init.constant_(self.fc2.bias, 0.)
             nn.init.constant_(self.fc3.bias, 0.)
