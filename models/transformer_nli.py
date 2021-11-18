@@ -305,7 +305,7 @@ class Comparison(nn.Module):
         x_1 = self.fc2(torch.relu(self.fc1(x_1)))
         if mask_1 is not None:
             mask_1 = (mask_1 == 0).transpose(0, 1).transpose(0, 2).type_as(x_1)
-            x_1 = (x_1 * mask_1).sum(dim=0) / ((mask_1 == 0).sum(dim=0) ** 0.5)
+            x_1 = (x_1 * mask_1).sum(dim=0) / (mask_1.sum(dim=0) ** 0.5)
         else:
             x_1 = x_1.sum(dim=0) / (x_1.size(0) ** 0.5)
 
@@ -313,7 +313,7 @@ class Comparison(nn.Module):
         x_2 = self.fc2(torch.relu(self.fc1(x_2)))
         if mask_2 is not None:
             mask_2 = (mask_2 == 0).transpose(0, 1).transpose(0, 2).type_as(x_2)
-            x_2 = (x_2 * mask_2).sum(dim=0) / ((mask_2 == 0).sum(dim=0) ** 0.5)
+            x_2 = (x_2 * mask_2).sum(dim=0) / (mask_2.sum(dim=0) ** 0.5)
         else:
             x_2 = x_2.sum(dim=0) / (x_2.size(0) ** 0.5)
 
@@ -360,6 +360,7 @@ class TransformerNLI(nn.Module):
     def forward(self, premise, hypothesis):
         premise_mask = (premise == 0).unsqueeze(1)
         hypothesis_mask = (hypothesis == 0).unsqueeze(1)
+
         premise = self.embedding(premise)
         hypothesis = self.embedding(hypothesis)
 

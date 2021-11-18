@@ -2,7 +2,7 @@ import time
 import datetime
 from torch import optim
 import datasets
-from labelSmoothedCrossEntropy import LabelSmoothedCrossEntropyCriterion
+from opt.labelSmoothedCrossEntropy import LabelSmoothedCrossEntropyCriterion
 from models import TransformerNLI
 from opt import InverseSquareRootScheduleOpt
 
