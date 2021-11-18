@@ -73,7 +73,7 @@ class MultiHeadedAttention(nn.Module):
         epoch = gol.get_value("epoch")
         epoch = 40 if epoch is None else epoch
         epoch = 40 if epoch > 40 else epoch
-        d = math.log(2000/epoch-1)
+        d = math.log(2000 / epoch - 1)
         if self.training:
             noise = -torch.empty_like(attn_weights).exponential_().log()
             attn_weights_noise = attn_weights + noise
@@ -285,13 +285,25 @@ class Comparison(nn.Module):
         self.fc2 = nn.Linear(args.embed_dim, args.embed_dim)
         self.fc3 = nn.Linear(args.embed_dim * 2, args.embed_dim)
         self.fc4 = nn.Linear(args.embed_dim, len(label_vocab))
+        self.reset_parameters()
+
+    def reset_parameters(self):
+        nn.init.xavier_uniform_(self.fc1.weight)
+        nn.init.xavier_uniform_(self.fc2.weight)
+        nn.init.xavier_uniform_(self.fc3.weight)
+        nn.init.xavier_uniform_(self.fc4.weight)
+        if self.bias:
+            nn.init.constant_(self.fc1.bias, 0.)
+            nn.init.constant_(self.fc2.bias, 0.)
+            nn.init.constant_(self.fc3.bias, 0.)
+            nn.init.constant_(self.fc4.bias, 0.)
 
     def forward(self, encoding_1, encoding_2, interaction_1, interaction_2, mask_1=None, mask_2=None):
         x_1 = torch.cat([encoding_1, interaction_1], dim=-1)
         x_1 = self.fc2(torch.relu(self.fc1(x_1)))
         if mask_1 is not None:
             mask_1 = (mask_1 == 0).transpose(0, 1).transpose(0, 2).type_as(x_1)
-            x_1 = (x_1 * mask_1).sum(dim=0) / (mask_1.sum(dim=0) ** 0.5)
+            x_1 = (x_1 * mask_1).sum(dim=0) / ((mask_1 == 0).sum(dim=0) ** 0.5)
         else:
             x_1 = x_1.sum(dim=0) / (x_1.size(0) ** 0.5)
 
@@ -299,7 +311,7 @@ class Comparison(nn.Module):
         x_2 = self.fc2(torch.relu(self.fc1(x_2)))
         if mask_2 is not None:
             mask_2 = (mask_2 == 0).transpose(0, 1).transpose(0, 2).type_as(x_2)
-            x_2 = (x_2 * mask_2).sum(dim=0) / (mask_2.sum(dim=0) ** 0.5)
+            x_2 = (x_2 * mask_2).sum(dim=0) / ((mask_2 == 0).sum(dim=0) ** 0.5)
         else:
             x_2 = x_2.sum(dim=0) / (x_2.size(0) ** 0.5)
 
@@ -314,12 +326,19 @@ class Embedding(nn.Module):
         super(Embedding, self).__init__()
         self.embed_scale = args.embed_dim ** 0.5
         word_embed = StaticEmbedding(vocab, model_dir_or_name='en-glove-840B-300d', lower=True,
-                                     requires_grad=False, only_use_pretrain_word=True)
-        char_embed = CNNCharEmbedding(vocab, embed_size=50)
+                                     requires_grad=False, min_freq=20,
+                                     only_use_pretrain_word=True, only_train_min_freq=True)
+        char_embed = CNNCharEmbedding(vocab, embed_size=30)
         self.embed = StackEmbedding([word_embed, char_embed])
         self.lut_proj = nn.Linear(self.embed.embed_size, args.embed_dim, bias=False)
         self.pe = PositionalEncoding(args.embed_dim, max_len=args.max_len)
         self.dropout = args.dropout
+        self.reset_parameters()
+
+    def reset_parameters(self):
+        nn.init.xavier_uniform_(self.lut_proj.weight)
+        if self.bias:
+            nn.init.constant_(self.lut_proj.bias, 0.)
 
     def forward(self, x):
         x = self.lut_proj(self.embed(x)).transpose(0, 1)
