@@ -339,8 +339,6 @@ class Embedding(nn.Module):
 
     def reset_parameters(self):
         nn.init.xavier_uniform_(self.lut_proj.weight)
-        if self.bias:
-            nn.init.constant_(self.lut_proj.bias, 0.)
 
     def forward(self, x):
         x = self.lut_proj(self.embed(x)).transpose(0, 1)
